@@ -1,0 +1,113 @@
+<<<<<<< HEAD
+K8S SETUP DOCUMENTATION:
+
+SERVER SETUP:
+T3.MEDIUM
+
+STEP1: DOCKER INSTALLATION:
+sudo dnf install -y docker
+sudo systemctl enable docker
+sudo systemctl start docker
+usermod -aG docker {username}
+
+STEP2: CONFIRMING DOCKER INSTALLATION:
+su - {username}
+docker run hello-world
+--------------------------------------------------------------------------------------------------------------
+STEP3: KUBECTL INSTALLATION:
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+chmod +x kubectl
+sudo mv kubectl /usr/local/bin/
+
+STEP4: CONFIRMATION OF KUBECTL:
+kubectl version --client
+--------------------------------------------------------------------------------------------------------------
+STEP 5: MINI KUBE INSTALLATION:
+curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+sudo install minikube-linux-amd64 /usr/local/bin/minikube
+minikube version
+
+--------------------------------------------------------------------------------------------------------
+STEP 6: STARTING MINIKUBE USING DOCKER DRIVER:
+minikube start --driver=docker
+
+This will:
+Create a local VM inside Docker
+Run a Kubernetes control plane + worker
+Configure kubectl automatically
+
+STEP 7: CHECKING STATUS OF MINIKUBE:
+kubectl get nodes
+
+-------------------------------------------------------------------------------------------------------
+
+STEP 8: GETTING INGRESS AND METRICS AS IT REQUIRED FOR LATER:
+minikube addons enable ingress
+minikube addons enable metrics-server
+minikube addons enable dashboard
+
+STEP 9: CONFIRMING EVRRYTHING IS THERE:
+kubectl get pods -A
+kubectl get deployment metrics-server -n kube-system
+
+
+
+
+
+=======
+K8S SETUP DOCUMENTATION:
+
+SERVER SETUP:
+T3.MEDIUM
+
+STEP1: DOCKER INSTALLATION:
+sudo dnf install -y docker
+sudo systemctl enable docker
+sudo systemctl start docker
+usermod -aG docker {username}
+
+STEP2: CONFIRMING DOCKER INSTALLATION:
+su - {username}
+docker run hello-world
+--------------------------------------------------------------------------------------------------------------
+STEP3: KUBECTL INSTALLATION:
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+chmod +x kubectl
+sudo mv kubectl /usr/local/bin/
+
+STEP4: CONFIRMATION OF KUBECTL:
+kubectl version --client
+--------------------------------------------------------------------------------------------------------------
+STEP 5: MINI KUBE INSTALLATION:
+curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+sudo install minikube-linux-amd64 /usr/local/bin/minikube
+minikube version
+
+--------------------------------------------------------------------------------------------------------
+STEP 6: STARTING MINIKUBE USING DOCKER DRIVER:
+minikube start --driver=docker
+
+This will:
+Create a local VM inside Docker
+Run a Kubernetes control plane + worker
+Configure kubectl automatically
+
+STEP 7: CHECKING STATUS OF MINIKUBE:
+kubectl get nodes
+
+-------------------------------------------------------------------------------------------------------
+
+STEP 8: GETTING INGRESS AND METRICS AS IT REQUIRED FOR LATER:
+minikube addons enable ingress
+minikube addons enable metrics-server
+minikube addons enable dashboard
+
+STEP 9: CONFIRMING EVRRYTHING IS THERE:
+kubectl get pods -A
+kubectl get deployment metrics-server -n kube-system
+
+
+
+
+
+>>>>>>> bdc5ac7a50e3d417db91af051f6f9abe41ce9f02

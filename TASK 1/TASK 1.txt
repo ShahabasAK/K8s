@@ -1,0 +1,95 @@
+<<<<<<< HEAD
+TASK 1:
+
+STEP 1:
+->pulling docker image from docker hub
+docker pull nginx:alpine
+
+->running image as a container
+docker run -d --name nginx-task1 -p 8080:80 nginx:alpine
+
+STEP 2:
+-> Creating the directoy
+mkdir /tmp/html
+
+-> Adding some content to the file:
+echo "<h1>Hello from Mounted Volume</h1>" | sudo tee /tmp/html/index.html
+
+-> Removing the existing container:
+docker rm -f nginx-task1
+
+-> Running the container again with the path mounted:
+docker run -d --name nginx-task1 -p 8080:80 -v /tmp/html:/usr/share/nginx/html nginx:alpine
+
+
+STEP 3:
+-> Adding veriables to the index.html
+echo "<h1>Welcome to $MY_TITLE</h1>" | sudo tee /tmp/html/index.html
+
+-> removing existing container
+docker rm -f nginx-task1
+
+->Passing the variable for MY_TITLE while running the docker
+docker run -d --name nginx-task1 -p 8080:80 -e MY_TITLE="Shahabas Page" -v /tmp/html:/usr/share/nginx/html nginx:alpine
+
+->Even though the variable is passed in the docker run command, we still have to let the nginx know to use the variable, as it only shares static files:
+docker exec -it nginx-task1 sh
+echo "<h1>Welcome to $MY_TITLE</h1>" > /usr/share/nginx/html/index.html
+exit
+
+-> Reload the page to see the value
+
+STEP 4:
+Before mounting the default nginx page was visible.
+
+After mounting the custom page we have mounted is visible. /tmp/html/index.html
+Also nginx only shows static values. 
+
+=======
+TASK 1:
+
+STEP 1:
+->pulling docker image from docker hub
+docker pull nginx:alpine
+
+->running image as a container
+docker run -d --name nginx-task1 -p 8080:80 nginx:alpine
+
+STEP 2:
+-> Creating the directoy
+mkdir /tmp/html
+
+-> Adding some content to the file:
+echo "<h1>Hello from Mounted Volume</h1>" | sudo tee /tmp/html/index.html
+
+-> Removing the existing container:
+docker rm -f nginx-task1
+
+-> Running the container again with the path mounted:
+docker run -d --name nginx-task1 -p 8080:80 -v /tmp/html:/usr/share/nginx/html nginx:alpine
+
+
+STEP 3:
+-> Adding veriables to the index.html
+echo "<h1>Welcome to $MY_TITLE</h1>" | sudo tee /tmp/html/index.html
+
+-> removing existing container
+docker rm -f nginx-task1
+
+->Passing the variable for MY_TITLE while running the docker
+docker run -d --name nginx-task1 -p 8080:80 -e MY_TITLE="Shahabas Page" -v /tmp/html:/usr/share/nginx/html nginx:alpine
+
+->Even though the variable is passed in the docker run command, we still have to let the nginx know to use the variable, as it only shares static files:
+docker exec -it nginx-task1 sh
+echo "<h1>Welcome to $MY_TITLE</h1>" > /usr/share/nginx/html/index.html
+exit
+
+-> Reload the page to see the value
+
+STEP 4:
+Before mounting the default nginx page was visible.
+
+After mounting the custom page we have mounted is visible. /tmp/html/index.html
+Also nginx only shows static values. 
+
+>>>>>>> bdc5ac7a50e3d417db91af051f6f9abe41ce9f02
