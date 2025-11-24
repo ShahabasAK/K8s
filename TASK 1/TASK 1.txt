@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 TASK 1:
 
 STEP 1:
@@ -90,6 +89,4 @@ STEP 4:
 Before mounting the default nginx page was visible.
 
 After mounting the custom page we have mounted is visible. /tmp/html/index.html
-Also nginx only shows static values. 
-
->>>>>>> bdc5ac7a50e3d417db91af051f6f9abe41ce9f02
+Also nginx only shows static values.
