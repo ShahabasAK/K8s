@@ -1,0 +1,63 @@
+Kubernetes deployment and service
+
+STEP 1:
+-> Creating the namespace "web-lab"
+ kubectl create namespace web-lab
+
+->Verify the creation of the namespace:
+kubectl get ns
+
+STEP 2:
+->Create deployment yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  namespace: web-lab
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:alpine
+        ports:
+        - containerPort: 80
+
+->Apply deployment file
+kubectl apply -f deployment.yaml
+
+
+STEP 3:
+-> Create service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+  namespace: web-lab
+spec:
+  type: ClusterIP
+  selector:
+    app: nginx
+  ports:
+  - port: 80
+    targetPort: 80
+
+->Apply service.yaml
+kubectl apply -f service.yaml
+
+
+STEP 4:
+->verifying
+kubectl get pods -n web-lab
+kubectl get deployment -n web-lab
+ kubectl get endpoints -n web-lab
+
+
+STEP 5:
