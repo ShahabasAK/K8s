@@ -1,0 +1,54 @@
+TASK 4:
+As we are running the k8s using minikube with docker driver, we wont be able to expose the service via public ip of ec2. So, we will be using ingress.
+-> enabling the ingress.
+minikube addons enable ingress
+->make sure its working.
+kubectl get pods -n ingress-nginx
+
+STEP 1:
+->Creating ingress
+vi ingress.yaml
+
+###############################################################################
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nginx-ingress
+  namespace: web-lab
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: nginx.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx-service
+            port:
+              number: 80
+###############################################################################
+
+-> Apply the ingress file
+kubectl -f ingress.yaml
+
+->verify the ingress
+kubectl get ingress -n web-lab
+
+STEP 2:
+-> Update the /etc/hosts for adding the host nginx.local with the minikube ip 
+->get minikube ip
+minikube ip
+
+->vi /etc/hosts
+<minikubeip> nginx.local
+
+STEP 3:
+
+->Access the service using curl command to check whether its able to access.
+curl http://nginx.local
+STEP 4:
+STEP 5:
