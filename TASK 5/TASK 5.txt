@@ -1,0 +1,93 @@
+TASK 5:
+
+STEP 1:
+-> Creation of config map
+vi configmap.yaml
+
+########################################################################################
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: web-lab
+data:
+  WELCOME_MSG: "Hello from ConfigMap"
+  APP_MODE: "development"
+########################################################################################
+
+-> Deploy the configmap file
+kubectl apply 0f configmap.yaml
+
+-> verify the deployment
+kubectl get configmap -n weblab
+
+->Describe the config file
+kubectl describe configmap app-config -n web-lab
+
+STEP 2:
+-> Creating the secret.yaml
+vi secret.yaml
+
+################################################################################################
+apiVersion: v1
+kind: Secret
+metadata:
+  name: app-secret
+  namespace: web-lab
+type: Opaque
+data:
+  API_KEY: dGVzdC1hcGkta2V5LTEyMzQ=   # base64 of "test-api-key-1234"
+################################################################################################
+
+->Deploy the secret.yaml
+kubectl apply -f secret.yaml
+
+-> Verufy the deployment of the secret.yaml
+kubectl get secret -n web-lab
+
+->Describe the secret using the name of the secret.
+kubectl describe secret app-secret -n web-lab
+
+STEP 3:
+-> Create a pod.yaml for running the busybox as a container(pod)
+vi pod.yaml
+##########################################################################################################
+apiVersion: v1
+kind: Pod
+metadata:
+  name: config-secret-test
+  namespace: web-lab
+spec:
+  containers:
+  - name: test-container
+    image: busybox:1.36
+    command: ["/bin/sh", "-c", "echo Welcome=$WELCOME_MSG; echo Mode=$APP_MODE; echo API_KEY=$API_KEY; sleep 3600"]
+    env:
+    - name: WELCOME_MSG
+      valueFrom:
+        configMapKeyRef:
+          name: app-config
+          key: WELCOME_MSG
+    - name: APP_MODE
+      valueFrom:
+        configMapKeyRef:
+          name: app-config
+          key: APP_MODE
+    - name: API_KEY
+      valueFrom:
+        secretKeyRef:
+          name: app-secret
+          key: API_KEY
+#####################################################################################################################
+
+
+-> Deploy the pod.yaml
+kubectl apply -f pod.yaml
+
+->Verify the pod is running:
+kubectl get pod -n web-lab
+
+
+STEP 4:
+-> Verify the pod is accessing the veriable in config and secret
+kubectl logs config-secret-test -n web-lab
