@@ -1,0 +1,128 @@
+TASK 6:
+
+
+STEP 1:
+->Creating pv.yaml for mounting the volume path
+vi pv.yaml
+############################################################################
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nginx-pv
+  namespace: web-lab
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /mnt/data/nginx-pv
+  persistentVolumeReclaimPolicy: Retain
+
+############################################################################
+
+->Applying the yaml file
+kubectl aaply -f pv.yaml
+
+->Checking the volume path
+kubectl get pv -n web-lab
+
+STEP 2:
+->Creating persistent volume chain
+vi pvc.yaml
+
+#################################################################################
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nginx-pvc
+  namespace: web-lab
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+
+#################################################################################
+-> Applying the pvc.yaml
+kubectl apply -f pvc.yaml
+
+->Check the deployment
+kubectl get pvc -n web-lab
+
+
+STEP 3:
+->Deploying nginx with using the custom pvc
+vi deployment.yaml
+
+######################################################################################
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-pv-deployment
+  namespace: web-lab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-pv
+  template:
+    metadata:
+      labels:
+        app: nginx-pv
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:alpine
+        volumeMounts:
+        - name: nginx-storage
+          mountPath: /usr/share/nginx/html
+      volumes:
+      - name: nginx-storage
+        persistentVolumeClaim:
+          claimName: nginx-pvc
+
+######################################################################################
+
+->Applying the deployment.yaml
+kubectl aaply -f deployment.yaml
+
+->Verifying the deployment.
+kubectl get pods -A
+
+STEP 4:
+->Checking whether its working by creating a index.html
+mkdir /mnt/data/nginx-pv
+
+->creating index.html
+vi index.html
+########################################################################
+This is persistent Nginx content
+#######################################################################
+
+->Log into the pod
+kubectl exec -it nginx-pv-deployment-6b7bbd44bc-9wntj -n web-lab -- sh
+
+->checking the index.html is visible over there.
+cat /usr/share/nginx/html/index.html
+
+
+STEP 5:
+-> Exposing the deployment as nodeport
+ kubectl expose deployment nginx-pv-deployment --type=NodePort --port=80 --namespace=web-lab
+
+->Verifying the nodeport:
+kubectl get svc -n web-lab
+
+->Accessing it using the minikube ip:
+curl http://192.168.49.2:30519/
+
+->Reverifying the volume is mounted as persistent. Deleting the pod manually.
+kubectl delete pod nginx-pv-deployment-6b7bbd44bc-7qm6j -n web-lab
+
+-> Revalidating whether the new pod has the mount path accessible:
+curl http://192.168.49.2:30519/
+
+
+
