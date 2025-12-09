@@ -1,0 +1,145 @@
+TASK 9:
+-> Creating minikube using calico cni:
+minikube start --driver=docker --cni=calico
+
+STEP 1:
+->Creating 2 namespaces:
+kubectl create namespace frontend
+kubectl create namespace backend
+
+->Verifying the namespaces are created
+kubectl get namespace
+
+STEP 2:
+->Deploying the nginx in the backend namespace
+vi backend-nginx.yaml
+#########################################################################
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-nginx
+  namespace: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend-nginx
+  template:
+    metadata:
+      labels:
+        app: backend-nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:alpine
+        ports:
+        - containerPort: 80
+#########################################################################
+
+->Depoying the nginx
+kubectl apply -f backend-nginx.yaml
+
+->Verifying the deployment
+kubectl get pods -A
+
+STEP 3:
+->Exposing it as a service 
+kubectl expose deployment backend-nginx \
+  --name=backend-service \
+  --type=ClusterIP \
+  --port=80 \
+  -n backend
+
+->Checking the status of those:
+kubectl get pods,svc -n backend
+
+STEP 4:
+->Deploy curl in both namespaces:
+vi frontend-curl.yaml
+
+###########################################################################
+apiVersion: v1
+kind: Pod
+metadata:
+  name: curl-frontend
+  namespace: frontend
+spec:
+  containers:
+  - name: curl
+    image: curlimages/curl:8.7.1
+    command: ["sleep", "3600"]
+###########################################################################
+
+vi backend-curl.yaml
+###########################################################################
+apiVersion: v1
+kind: Pod
+metadata:
+  name: curl-backend
+  namespace: backend
+spec:
+  containers:
+  - name: curl
+    image: curlimages/curl:8.7.1
+    command: ["sleep", "3600"]
+
+###########################################################################
+->Applying both deployment
+kubectl apply -f backend-curl.yaml
+kubectl apply -f frontend-curl.yaml
+
+STEP 5:
+
+->Checking the connectivity from front end and backend to backend before network policy:
+
+kubectl exec -it curl-frontend -n frontend -- \
+  curl http://backend-service.backend.svc.cluster.local
+
+kubectl exec -it curl-backend -n backend -- \
+  curl http://backend-service.backend.svc.cluster.local
+
+
+STEP 6:
+->Creating the network policy:
+vi networkpolicy.yaml
+
+###############################################################################
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-frontend-to-backend
+  namespace: backend
+spec:
+  podSelector:
+    matchLabels:
+      app: backend-nginx
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          access: frontend
+    ports:
+    - protocol: TCP
+      port: 80
+###############################################################################
+
+->Labelling the frontend namespace to identify the namespace by policy
+kubectl label namespace frontend access=frontend
+
+
+->Deploying the policy
+kubectl apply -f networkpolicy.yaml
+
+->Checking the policy
+kubectl get networkpolicy -n backend
+
+STEP 7:
+->Verifying the access now:
+kubectl exec -it curl-frontend -n frontend -- \
+  curl http://backend-service.backend.svc.cluster.local
+
+kubectl exec -it curl-backend -n backend -- \
+  curl http://backend-service.backend.svc.cluster.local
+
