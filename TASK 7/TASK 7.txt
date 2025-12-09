@@ -1,0 +1,73 @@
+TASK 7:
+
+STEP 1:
+->Creating the deployment using the image nginx:1.25-alpine (initial version)
+vi deployment.yaml
+
+#############################################################################
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rolling-update-nginx
+  namespace: web-lab
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: rolling-nginx
+  template:
+    metadata:
+      labels:
+        app: rolling-nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.25-alpine
+        ports:
+        - containerPort: 80
+
+#############################################################################
+
+->Verifying the deployment is fine:
+kubectl get pods -A
+
+->Describe the deployment
+kubectl describe deployment rolling-update-nginx -n web-lab
+
+STEP 2:
+->Updating the image version into new
+kubectl set image deployment/rolling-update-nginx nginx=nginx:1.27-alpine -n web-lab
+
+->Checking the update status:
+kubectl rollout status deployment/rolling-update-nginx -n web-lab
+
+->checking the status of the pods
+kubectl get pods -n web-lab -o wide
+
+->checking the status of the deployment after the rollout
+kubectl describe deployment rolling-update-nginx -n web-lab
+
+
+STEP 3:
+->Checking with a unvalid image to check the error
+kubectl set image deployment/rolling-update-nginx nginx=nginx:BADIMAGE -n web-lab
+
+->Rollout will be failed due to the invalid image:
+
+STEP 4:
+->Rolling it back to previous version with valid image
+kubectl rollout undo deployment/rolling-update-nginx -n web-lab
+
+->Checking the status:
+ kubectl rollout status deployment/rolling-update-nginx -n web-lab
+
+
+STEP 5:
+->Checking the deployment history
+kubectl rollout history deployment/rolling-update-nginx -n web-lab
+
